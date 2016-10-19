@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <style>
+            canvas{
+                position: absolute;
+                margin: auto;
+                display: block;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgb(108,246,108);
+                border: 3px solid #001;
+            }
+        </style>
+    </head>
+    <body>
+        <script>
+            var canvas = document.createElement('canvas');
+            canvas.width=500;
+            canvas.height=500;
+            var ctx = canvas.getContext('2d');
+            document.body.appendChild(canvas);
+            
+            var sheet = new Image();
+            sheet.src ="final.png";
+            sheet.onload =main;
+            
+            //timer variables
+            
+            var frames,ticks,updates,ref;
+            
+            var backgroud={
+                img:null,
+                x:null,
+                y:null,
+                
+                init:function(){
+                    this.img = [];
+                },
+                update:function(){
+                    
+                },
+                draw:function(){
+                    
+                }
+            }
+            
+            var player={
+                x:null,
+                y:null,
+                width:null,
+                height:null,
+                Xd:null,
+                Yd:null,
+                speed:5,
+                ims:null,
+                imsF:null,
+                moveState:null,
+                mvM:null,
+                init:function(){
+                    this.width = (10/100)*canvas.width;
+                    this.height=(10/100)*canvas.height;
+                    this.moveState ={"left":0,"right":1,"still":3,"up":4,"down":5}
+                    this.mvM= this.moveState.still;
+                    this.x = (canvas.width+this.width)/2;
+                    this.y = (canvas.height+this.height)/2;
+                    
+                    this.Xd=0;
+                    this.Yd=0;
+                    this.imsF=[];
+                    this.ims =[];
+                    
+                    for(var x =0;x<14;x++){
+                        this.imsF[x]= new SpriteSheet(sheet,20*x,0,20,20);
+                    }
+                    
+                   
+                },
+                update:function(){
+                    this.x += this.Xd*this.speed;
+                    this.y += this.Yd*this.speed;
+                    
+                    if(this.x<0||this.x+this.width>canvas.width){
+                        this.Xd *=-1;
+                    }
+                    
+                    if(this.y<0||this.y+this.height>canvas.height){
+                        this.Yd *=-1;
+                    }
+                    
+                },
+                draw:function(){
+                    if(this.mvM===this.moveState.still){
+                        
+                        
+                        this.imsF[ref].draw(ctx,this.x,this.y,this.width,this.height);
+                        }else if(this.mvM===this.moveState.left){
+                            ctx.fillStyle="red";
+                            ctx.fillRect(this.x,this.y,this.width,this.height);
+                        }else if(this.mvM === this.moveState.right){
+                            ctx.fillStyle="green";
+                            ctx.fillRect(this.x,this.y,this.width,this.height);
+                        }else if(this.mvM===this.moveState.down){
+                            this.imsF[ref].draw(ctx,this.x,this.y,this.width,this.height);
+                        }else if(this.mvM===this.moveState.up){
+                            ctx.fillStyle="yellow";
+                        ctx.fillRect(this.x,this.y,this.width,this.height);
+                        }
+                    
+                }
+            }
+           
+            
+            //GFX functions
+            function SpriteSheet(image,x,y,w,h){
+                this.image = image;
+                this.x=x;
+                this.y=y;
+                this.width=w;
+                this.height=h;
+            }
+            SpriteSheet.prototype.draw = function(context,x,y,w,h){
+                context.drawImage(this.image,this.x,this.y,this.width,this.height,x,y,w,h);
+            }
+            
+            //Game functions
+            function main(){
+                init();
+                loop();
+                document.addEventListener('keydown',function(e){
+                    switch(e.which){
+                        case 37:
+                            player.Xd=-1;
+                            player.mvM = player.moveState.left;
+                            break;
+                        case 38:
+                             player.Yd=-1;
+                            player.mvM = player.moveState.up;
+                            break;
+                        case 39:
+                            player.Xd=1;
+                            player.mvM = player.moveState.right;
+                            break;
+                        case 40:
+                            player.Yd=1;
+                            player.mvM = player.moveState.down;
+                            break;
+                    }
+                });
+                document.addEventListener('keyup',function(e){
+                    switch(e.which){
+                         case 37:
+                            player.Xd=0;
+                            player.mvM = player.moveState.still;
+                            break;
+                        case 38:
+                             player.Yd=0;
+                            player.mvM = player.moveState.still;
+                            break;
+                        case 39:
+                            player.Xd=0;
+                            player.mvM = player.moveState.still;
+                            break;
+                        case 40:
+                            player.Yd=0;
+                            player.mvM = player.moveState.still;
+                            break;
+                    }
+                });
+            }
+            function init(){
+                frames=0;
+                ticks=0;
+                updates=0;
+                ref=0;
+                backgroud.init();
+                player.init();
+                
+            }
+            function loop(){
+                update();
+                draw();
+                window.requestAnimationFrame(loop,canvas);
+            }
+            function update(){
+                frames++;
+                ticks =(frames%61);
+                if(ticks%10==0){
+                    updates++;
+                    ref =updates%14;
+                }
+     
+                console.log("ref "+ref);
+                backgroud.update();
+                player.update();
+            }
+            function draw(){
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                backgroud.draw();
+                player.draw();
+                ctx.fillStyle="blue";
+                ctx.fillRect(0,0,20,20);
+            }
+            
+        </script>
+    </body>
+</html>
